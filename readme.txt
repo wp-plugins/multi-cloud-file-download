@@ -3,7 +3,7 @@ Contributors: SMEStorage
 Tags: Amazon, S3, RackSpace, Cloud Files, Box.net, Microsoft, Live, SkyDrive, SMEStorage, GMail, GDrive, GMail Apps, Email, FTP, WebDav, Cloud Storage
 Requires at least: 2.6
 Tested up to: 2.8
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 
 The SMEStorage Multi-Cloud File Download plug-in enables you to share files for download. via a widget,  for over 10 cloud storage providers. 
 == Description ==
