@@ -1,18 +1,17 @@
 <?php
 /*
-Plugin Name: SMEStorage Multi-Cloud File Download
-Plugin URI: http://www.smestorage.com/
-Description: The SMEStorage Multi-Cloud File Download plug-in enables you to share files for download. via a widget,  for over 10 cloud storage providers. These include Amazon S3, RackSpace Cloud Files, MobileMe, Box.net, Microsoft Live SkyDrive, Gmail, any POP3 or IMAP enabled email account, and any FTP server directory.
-Author: SME Storage 
-Author URI: http://www.smestorage.com/
-Version: 1.0.4
+Plugin Name: StorageMadeEasy Multi-Cloud File Download
+Plugin URI: http://www.storagemadeeasy.com/
+Description: The StorageMadeEasy Multi-Cloud File Download plug-in enables you to share files for download, via a widget, for over 30 cloud storage providers. These include Amazon S3, RackSpace Cloud Files, Box.net, Microsoft Live SkyDrive, Gmail, any POP3 or IMAP enabled email account, and any FTP server directory.
+Author: Storage Made Easy
+Author URI: http://www.storagemadeeasy.com/
+Version: 1.0.5
 */
-
- 
 
 add_option('tag','');
 add_option('order','');
 add_option('no_of_files','');
+add_option('SME_server_url','');
 add_option('users_names','');
 add_option('file_or_time','');
 
@@ -20,37 +19,37 @@ $tag = '';
 $order = '';
 $no_of_files = '';
 $users_names = '';
+$SME_server_url='';
 $file_or_time = '';
 
 if(!empty($_POST['tag'])) $tag=$_POST['tag'];
 if(!empty($_POST['order'])) $order = $_POST['order'];
-if(!empty($_POST['no_of_files'])) $no_of_files = $_POST['no_of_files'];
+if(!empty($_POST['no_of_files']) && is_numeric($_POST['no_of_files'])) $no_of_files = $_POST['no_of_files'];
 if(!empty($_POST['users_names'])) $users_names = $_POST['users_names'];
+if(!empty($_POST['SME_server_url'])) $SME_server_url = $_POST['SME_server_url'];
 if(!empty($_POST['file_or_time'])) $file_or_time = $_POST['file_or_time'];
 
-
-if(strlen($tag)>0)
-{
+if(strlen($tag)>0){
 	update_option('tag',$tag);
 	update_option('order',$order);
 	update_option('no_of_files',$no_of_files);
 	update_option('file_or_time',$file_or_time);
 }
 
-
-
-if(strlen($users_names)>0)
-{
+if(strlen($users_names)>0){
 	update_option('users_names',$users_names);
 }
 
+if(strlen($SME_server_url)>0){
+	update_option('SME_server_url',$SME_server_url);
+}
 
-function sme_public_files()
-{
+function sme_public_files(){
 	$tag = get_option('tag');
 	$order = get_option('order');
 	$no_of_files = get_option('no_of_files');
 	$users_names = get_option('users_names');	
+	$SME_server_url = get_option('SME_server_url');	
 	$a=$b=$c=$d='';
 	 switch($order)
 		{		
@@ -76,10 +75,20 @@ function sme_public_files()
 
 		}
 
-
 		?>
-		<h3>SMEStorage Public Files</h3>
-		<p>This Plug-In displays files that you have set to be public on SMEStorage.com. SMEStorage.com is a multi-cloud access provider and supports over 10 storage clouds including Amazon S3, Box.net, RackSpace CloudFiles, MobileMe, and Microsoft Live SKyDrive.</p>
+		<h3>StorageMadeEasy Public Files</h3>
+		<p>This Plug-In displays files that you have set to be public on StorageMadeEasy.com. StorageMadeEasy.com is a multi-cloud access provider and supports over 30 storage clouds including DropBox, Microsoft Live SkyDrive, Amazon S3, Box.com, RackSpace CloudFiles, FTP and WebDAV.</p>
+<?php
+if(!ini_get("allow_url_fopen") && function_exists('curl_init')){
+?>
+<div style="padding-top:10px; color:#880000; font-size:14px">
+Warning!<br>
+CURL and option allow_url_fopen is disabled. So, plugin can not send requests to SME API. It is need to enable cURL or option allow_url_fopen in the file php.ini
+</div>
+<?php
+}
+
+?>
 		<h4>Plugin Options</h4>
 	<form name="form1" action="" method="post">
 	<table width="692" border="1">
@@ -98,7 +107,7 @@ function sme_public_files()
 	</td>
   </tr>
   <tr>
-    <td align="left">No of Files</td>
+    <td align="left">Number of Files</td>
     <td align="left"><input type="text" value="<?php if(strlen($no_of_files)>0){ echo $no_of_files;}else {?>20<?php }?>" name="no_of_files"></td>
   </tr>
   <tr>
@@ -112,12 +121,38 @@ function sme_public_files()
 </table>
 </form>
 
+<script>
+function updateServer(){
+	if(document.getElementById("SME_server_url2").value=='') return ;
+	document.getElementById("SME_server_url").value=document.getElementById("SME_server_url2").value;
+}
+</script>
 <h4>SME Details</h4>
 	<form name="form2"  action="" method="post">
-	<table width="250" border="1">
+	<table width="450" border="1">
+  <tr>
+    <td align="left" width="200">SME Server</td>
+    <td align="right">
+       
+      <table border="0" cellpadding="0" cellspacing="0" style="margin-top:2px; margin-bottom:2px;">
+         <tr>
+            <td><input type="text" id="SME_server_url" name="SME_server_url" value="<?php echo $SME_server_url; ?>" style="width:259px; height:22px; margin-right:0px; padding-right:0px"></td>
+            
+            <td class="dvSelect" style="margin:0px; padding:0px; background-image:url(<?php echo plugins_url('multi-cloud-file-download.1.0.4/selectButton.png', dirname(__FILE__)); ?>); background-repeat:no-repeat; overflow: hidden;">
+               <select size="1" id="SME_server_url2" style="width:18px; margin-left:0px; padding-left:0px; height:22px; opacity:0.0;" onchange="updateServer();">
+                  <option value=""> </option>
+                  <option value="storagemadeeasy.com">storagemadeeasy.com</option>
+                  <option value="eu.storagemadeeasy.com">eu.storagemadeeasy.com</option>
+               </select>
+            </td>
+         </tr>
+      </table>
+
+    </td>
+  </tr>
   <tr>
     <td align="left">SME Username</td>
-    <td align="right"><input type="text" name="users_names" value="<?php echo $users_names;?>"></td>
+    <td align="right"><input type="text" name="users_names" value="<?php echo $users_names;?>" style="width:100%;"></td>
   </tr>
   <tr>
     <td>&nbsp;</td>
@@ -130,9 +165,22 @@ function sme_public_files()
 
 function fetch_rss_feed($tag,$order,$no_of_files,$users_names)
 {
-	//$blogurl = "http://www.smetube.com/smestorage/rss/last/xxx/*/20";
-	//$blogurl = "http://www.smetube.com/smestorage/rss/".$order."/".$users_names."/".$tag."/".$no_of_files;
-	$blogurl = "http://smestorage.com/rss/".$order."/".$users_names."/".$tag."/".$no_of_files;
+	if(empty($order)) $order='last';
+	$url = get_option('SME_server_url');
+	if(empty($url)) $url='storagemadeeasy.com';
+
+	$proto='http://';
+	$blogurl='';
+	if(preg_match("/^http([s]{0,1})\:\/\/(.+?)(\/{0,1})$/i", $url, $m)){
+		if($m[1]=='s') $proto='https://';
+		$blogurl=$proto.$m[2];
+	}else{
+		$blogurl=$proto.$url;
+	}
+
+	if(!isset($tag) || $tag=='') $tag='*';
+	if($tag!='*') $tag=urlencode($tag);
+	$blogurl .= "/rss/".$order."/".urlencode($users_names)."/".$tag."/".$no_of_files;
 
 	$contents = getPageByUrl($blogurl);
 	$contents = preg_replace('/<title>/',"******",$contents,2);
@@ -192,22 +240,24 @@ function getPageByUrl($url){
 		if(!empty($contents))	return $contents;
 	}
 
-	$ch=curl_init();									# try use cURL
-	curl_setopt($ch, CURLOPT_URL, $url);
-	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-	if(strpos($url, "https://")!==false) curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-	$contents = curl_exec($ch);
-	$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+	if(function_exists('curl_init')){
+		$ch=curl_init();									# try use cURL
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+		curl_setopt($ch, CURLOPT_MAXREDIRS, 3);
+		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+		if(strpos($url, "https://")!==false) curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+		$contents = curl_exec($ch);
+		$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+	}
 	return $contents;
 }
 
-
-function sme_widget_files() {
+function sme_widget_files(){
 	if(!function_exists('register_sidebar_widget') && !function_exists('wp_register_sidebar_widget'))
 		return;
 
-	function sme_widget($args) 
-	{
+	function sme_widget($args){
 		extract($args);
 
 		$options	= get_option('sme_widget');
@@ -227,11 +277,10 @@ function sme_widget_files() {
 		echo $after_widget;
 	}
 
-	function control_option() 
-	{
+	function control_option(){
 		$options = get_option('sme_widget');
-		if ( !is_array($options) )
-			$options = array('title'=>'SMEStorage');
+		if(!is_array($options))
+			$options = array('title'=>'Storage Made Easy');
 
 		if ( $_POST['sme_submit'] ) {
 			$options['title'] = strip_tags(stripslashes($_POST['wpaypal-title']));			
@@ -246,22 +295,19 @@ function sme_widget_files() {
 	}
 
 	if(function_exists('wp_register_sidebar_widget')){
-		wp_register_sidebar_widget('sme_public_files_w1', 'SMEStorage Files', 'sme_widget', array('description' => __('The SMEStorage Multi-Cloud File Download plug-in enables you to share files for download. via a widget,  for over 10 cloud storage providers. These include Amazon S3, RackSpace Cloud Files, MobileMe, Box.net, Microsoft Live SkyDrive, Gmail, any POP3 or IMAP enabled email account, and any FTP server directory.')));
-		wp_register_widget_control('sme_public_files_w1', 'SMEStorage Files', 'control_option');
+		wp_register_sidebar_widget('sme_public_files_w1', 'StorageMadeEasy Files', 'sme_widget', array('description' => __('The StorageMadeEasy Multi-Cloud File Download plug-in enables you to share files for download. via a widget,  for over 10 cloud storage providers. These include Amazon S3, RackSpace Cloud Files, Box.net, Microsoft Live SkyDrive, Gmail, any POP3 or IMAP enabled email account, and any FTP server directory.')));
+		wp_register_widget_control('sme_public_files_w1', 'StorageMadeEasy Files', 'control_option');
 	}elseif(function_exists('register_sidebar_widget')){
-		register_sidebar_widget('SMEStorage Files', 'sme_widget');
-		register_widget_control('SMEStorage Files', 'control_option', 100, 100);
+		register_sidebar_widget('StorageMadeEasy Files', 'sme_widget');
+		register_widget_control('StorageMadeEasy Files', 'control_option', 100, 100);
 	}
-
 }
-
 
 add_action('plugins_loaded', 'sme_widget_files');
 add_action('admin_menu', 'sme_tube_public_files');
 
-function sme_tube_public_files() 
-{
-	add_menu_page('', 'SMEStorage Public Files', 8, __FILE__, 'sme_public_files');
+function sme_tube_public_files(){
+	add_menu_page('', 'SME Public Files', 8, __FILE__, 'sme_public_files');
 	add_submenu_page(__FILE__, 'SME Files', 'SME Files', 8, __FILE__, 'sme_public_files');
 }
 
