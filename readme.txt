@@ -3,7 +3,7 @@ Contributors: StorageMadeEasy
 Tags: Amazon, S3, RackSpace, Cloud Files, Box.net, Microsoft, Live, SkyDrive, StorageMadeEasy, GMail, GDrive, GMail Apps, Email, FTP, WebDav, Cloud Storage
 Requires at least: 2.6
 Tested up to: 3.5.2
-Stable tag: 1.0.5
+Stable tag: 1.0.6
 
 The StorageMadeEasy Multi-Cloud File Download plug-in enables you to share files for download, via a widget, for over 30 cloud storage providers. 
 == Description ==

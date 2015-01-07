@@ -5,7 +5,7 @@ Plugin URI: http://www.storagemadeeasy.com/
 Description: The StorageMadeEasy Multi-Cloud File Download plug-in enables you to share files for download, via a widget, for over 30 cloud storage providers. These include Amazon S3, RackSpace Cloud Files, Box.net, Microsoft Live SkyDrive, Gmail, any POP3 or IMAP enabled email account, and any FTP server directory.
 Author: Storage Made Easy
 Author URI: http://www.storagemadeeasy.com/
-Version: 1.0.5
+Version: 1.0.6
 */
 
 add_option('tag','');
