@@ -5,7 +5,7 @@ Plugin URI: http://www.storagemadeeasy.com/
 Description: The StorageMadeEasy Multi-Cloud File Download plug-in enables you to share files for download, via a widget, for over 30 cloud storage providers. These include Amazon S3, RackSpace Cloud Files, Box.net, Microsoft Live SkyDrive, Gmail, any POP3 or IMAP enabled email account, and any FTP server directory.
 Author: Storage Made Easy
 Author URI: http://www.storagemadeeasy.com/
-Version: 1.0.6
+Version: 1.1.1
 */
 
 add_option('tag','');
@@ -14,6 +14,7 @@ add_option('no_of_files','');
 add_option('SME_server_url','');
 add_option('users_names','');
 add_option('file_or_time','');
+add_option('file_extension','');
 
 $tag = '';
 $order = '';
@@ -21,6 +22,7 @@ $no_of_files = '';
 $users_names = '';
 $SME_server_url='';
 $file_or_time = '';
+$file_extension = '';
 
 if(!empty($_POST['tag'])) $tag=$_POST['tag'];
 if(!empty($_POST['order'])) $order = $_POST['order'];
@@ -28,12 +30,14 @@ if(!empty($_POST['no_of_files']) && is_numeric($_POST['no_of_files'])) $no_of_fi
 if(!empty($_POST['users_names'])) $users_names = $_POST['users_names'];
 if(!empty($_POST['SME_server_url'])) $SME_server_url = $_POST['SME_server_url'];
 if(!empty($_POST['file_or_time'])) $file_or_time = $_POST['file_or_time'];
+if(!empty($_POST['file_extension'])) $file_extension = $_POST['file_extension'];
 
 if(strlen($tag)>0){
 	update_option('tag',$tag);
 	update_option('order',$order);
 	update_option('no_of_files',$no_of_files);
 	update_option('file_or_time',$file_or_time);
+	update_option('file_extension',$file_extension);
 }
 
 if(strlen($users_names)>0){
@@ -71,6 +75,19 @@ function sme_public_files(){
 
 			case "file_with_time":
 			$d = 'checked="checked"';
+			break;
+
+		}
+
+		$file_extension = get_option('file_extension');
+		switch($file_extension)
+		{		
+			case "file_with_extension":
+			$e = 'checked="checked"';
+			break;
+
+			case "file_without_extension":
+			$f = 'checked="checked"';
 			break;
 
 		}
@@ -115,6 +132,10 @@ CURL and option allow_url_fopen is disabled. So, plugin can not send requests to
     <td align="left">&nbsp;<input type="radio" name="file_or_time" <?php echo $c;?> value="only_file" />&nbsp;Filename&nbsp;<input type="radio" name="file_or_time" <?php echo $d;?> value="file_with_time" />&nbsp;Filename With TimeStamp</td>
   </tr>
   <tr>
+    <td align="left">Option For Displaying extension in FileName</td>
+    <td align="left">&nbsp;<input type="radio" name="file_extension" <?php echo $e;?> value="file_with_extension" />&nbsp;Filename With Extension&nbsp;<input type="radio" name="file_extension" <?php echo $f;?> value="file_without_extension" />&nbsp;Filename Without Extension</td>
+  </tr>
+  <tr>
     <td>&nbsp;</td>
     <td><input type="submit" value="Update" name="submit"></td>
   </tr>
@@ -138,7 +159,7 @@ function updateServer(){
          <tr>
             <td><input type="text" id="SME_server_url" name="SME_server_url" value="<?php echo $SME_server_url; ?>" style="width:259px; height:22px; margin-right:0px; padding-right:0px"></td>
             
-            <td class="dvSelect" style="margin:0px; padding:0px; background-image:url(<?php echo plugins_url('multi-cloud-file-download.1.0.4/selectButton.png', dirname(__FILE__)); ?>); background-repeat:no-repeat; overflow: hidden;">
+            <td class="dvSelect" style="margin:0px; padding:0px; background-image:url(<?php echo plugins_url('multi-cloud-file-download/selectButton.png', dirname(__FILE__)); ?>); background-repeat:no-repeat; overflow: hidden;">
                <select size="1" id="SME_server_url2" style="width:18px; margin-left:0px; padding-left:0px; height:22px; opacity:0.0;" onchange="updateServer();">
                   <option value=""> </option>
                   <option value="storagemadeeasy.com">storagemadeeasy.com</option>
@@ -185,44 +206,54 @@ function fetch_rss_feed($tag,$order,$no_of_files,$users_names)
 	$contents = getPageByUrl($blogurl);
 	$contents = preg_replace('/<title>/',"******",$contents,2);
 	//$contents = preg_replace('/<title>/',"******",$contents,1);
-	//$contents = preg_replace('/<link>/',"******",$contents,1);		
-	$contents = preg_replace('/<link>/',"******",$contents,2);	
+	//$contents = preg_replace('/<link>/',"******",$contents,1);
+	$contents = preg_replace('/<link>/',"******",$contents,2);
 	$contents = preg_replace('/<pubDate>/',"******",$contents,1);
 	$total="";
 	$file_or_time = get_option('file_or_time');
+	$file_extension = get_option('file_extension');
+	
 	while(stripos($contents,'<item>'))
 	{
-		$item = stripos($contents,'<item>',0);	
+		$item = stripos($contents,'<item>',0);
 		$p1 = stripos($contents,'<title>',$item);
 		if($p1>0)
 		{
 			$p2 = stripos($contents,'</title>',$p1);
 			$title = substr($contents,$p1+7,$p2-$p1-7);
-					$q1 = stripos($contents,'<link>',$item);
-					if($q1>0)
-					{
-						$q2 = stripos($contents,'</link>',$q1);			
-						$link = substr($contents,$q1+6,$q2-$q1-6);	
-						//$total .= $link."<br>";
-					}
-					$r1 = stripos($contents,'<pubDate>',$item);
 
-					if($r1>0)
-					{
-						$r2 = stripos($contents,'</pubDate>',$r1);			
-						$pubdate = substr($contents,$r1+9,$r2-$r1-9);
-						if($file_or_time=="file_with_time")
-						{
-							$total .= '<a href="'.$link.'" >'.$title.'</a>'."<br>".$pubdate."<br><br>";	
-						}
-						else
-						{
-							$pubdate = "";
-							$total .= '<a href="'.$link.'" >'.$title.'</a>'."<br>".$pubdate."<br>";			
-						}	
+			if($file_extension=="file_without_extension"){
+				$p0 = strrpos($title, '.');		// remove extension
+				if($p0>0){
+					$title = substr($title, 0, $p0);
+				}
+			}
 
-						//$total .= $pubdate."<br>";
-					}			
+			$q1 = stripos($contents,'<link>',$item);
+			if($q1>0)
+			{
+				$q2 = stripos($contents,'</link>',$q1);
+				$link = substr($contents,$q1+6,$q2-$q1-6);
+				//$total .= $link."<br>";
+			}
+			$r1 = stripos($contents,'<pubDate>',$item);
+
+			if($r1>0)
+			{
+				$r2 = stripos($contents,'</pubDate>',$r1);
+				$pubdate = substr($contents,$r1+9,$r2-$r1-9);
+				if($file_or_time=="file_with_time")
+				{
+					$total .= '<a href="'.$link.'" >'.$title.'</a>'."<br>".$pubdate."<br><br>";
+				}
+				else
+				{
+					$pubdate = "";
+					$total .= '<a href="'.$link.'" >'.$title.'</a>'."<br>".$pubdate."<br>";
+				}
+
+				//$total .= $pubdate."<br>";
+			}
 
 			$contents = preg_replace('/<pubDate>/',"******",$contents,1);	
 			$contents = preg_replace('/<title>/',"******",$contents,1);	
